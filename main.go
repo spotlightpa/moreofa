@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/carlmjohnson/exitcode"
-	"github.com/spotlightpa/moreofa/commentthan"
+	"github.com/spotlightpa/moreofa/internal/commentthan"
 )
 
 func main() {

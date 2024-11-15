@@ -1,15 +1,19 @@
 package commentthan
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"os"
+	"os/signal"
+	"strconv"
 
 	"github.com/carlmjohnson/flagx"
 	"github.com/carlmjohnson/flagx/lazyio"
 	"github.com/earthboundkid/versioninfo/v2"
+	"github.com/spotlightpa/moreofa/internal/clogger"
 )
 
 const AppName = "More of a"
@@ -21,7 +25,7 @@ func CLI(args []string) error {
 		return err
 	}
 	if err = app.Exec(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		clogger.Logger.Error("runtime error", "error", err)
 	}
 	return err
 }
@@ -31,9 +35,10 @@ func (app *appEnv) ParseArgs(args []string) error {
 	src := lazyio.FileOrURL(lazyio.StdIO, nil)
 	app.src = src
 	fl.Var(src, "src", "source file or URL")
-	app.Logger = log.New(io.Discard, AppName+" ", log.LstdFlags)
-	flagx.BoolFunc(fl, "verbose", "log debug output", func() error {
-		app.Logger.SetOutput(os.Stderr)
+	clogger.UseDevLogger()
+	fl.Func("level", "log level", func(s string) error {
+		l, _ := strconv.Atoi(s)
+		clogger.Level.Set(slog.Level(l))
 		return nil
 	})
 	fl.Usage = func() {
@@ -60,21 +65,15 @@ Options:
 
 type appEnv struct {
 	src io.ReadCloser
-	*log.Logger
 }
 
 func (app *appEnv) Exec() (err error) {
-	app.Println("starting")
-	defer func() { app.Println("done") }()
+	clogger.Logger.Info("starting")
+	defer func() { clogger.Logger.Info("done") }()
 
-	n, err := io.Copy(os.Stdout, app.src)
-	defer func() {
-		e2 := app.src.Close()
-		if err == nil {
-			err = e2
-		}
-	}()
-	app.Printf("copied %d bytes\n", n)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
 
-	return err
+	<-ctx.Done()
+	return ctx.Err()
 }
