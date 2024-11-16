@@ -1,17 +1,20 @@
 package commentthan
 
 import (
+	"cmp"
 	"context"
 	"flag"
 	"fmt"
 	"io"
 	"log/slog"
+	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
+	"time"
 
 	"github.com/carlmjohnson/flagx"
-	"github.com/carlmjohnson/flagx/lazyio"
 	"github.com/earthboundkid/versioninfo/v2"
 	"github.com/spotlightpa/moreofa/internal/clogger"
 )
@@ -24,7 +27,9 @@ func CLI(args []string) error {
 	if err != nil {
 		return err
 	}
-	if err = app.Exec(); err != nil {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+	if err = app.Exec(ctx); err != nil {
 		clogger.Logger.Error("runtime error", "error", err)
 	}
 	return err
@@ -32,9 +37,7 @@ func CLI(args []string) error {
 
 func (app *appEnv) ParseArgs(args []string) error {
 	fl := flag.NewFlagSet(AppName, flag.ContinueOnError)
-	src := lazyio.FileOrURL(lazyio.StdIO, nil)
-	app.src = src
-	fl.Var(src, "src", "source file or URL")
+	fl.StringVar(&app.addr, "port", cmp.Or(os.Getenv("PORT"), ":58448"), "")
 	clogger.UseDevLogger()
 	fl.Func("level", "log level", func(s string) error {
 		l, _ := strconv.Atoi(s)
@@ -57,23 +60,50 @@ Options:
 	if err := fl.Parse(args); err != nil {
 		return err
 	}
-	if err := flagx.ParseEnv(fl, AppName); err != nil {
+	if err := flagx.ParseEnv(fl, "MOREOFA"); err != nil {
 		return err
 	}
 	return nil
 }
 
 type appEnv struct {
-	src io.ReadCloser
+	addr string
 }
 
-func (app *appEnv) Exec() (err error) {
-	clogger.Logger.Info("starting")
+func (app *appEnv) Exec(ctx context.Context) (err error) {
 	defer func() { clogger.Logger.Info("done") }()
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
+	handler := app.router()
+	srv := &http.Server{
+		Addr:              app.addr,
+		Handler:           handler,
+		BaseContext:       func(net.Listener) context.Context { return ctx },
+		ReadHeaderTimeout: 5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       1 * time.Minute,
+	}
+	ch := make(chan error, 1)
+	go func() {
+		<-ctx.Done()
+		clogger.Logger.Info("shutting down")
 
-	<-ctx.Done()
-	return ctx.Err()
+		shutdownCtx, stop := context.WithTimeout(context.Background(), 10*time.Second)
+		defer stop()
+		ch <- srv.Shutdown(shutdownCtx)
+	}()
+	clogger.Logger.Info("starting", "port", app.addr)
+	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		return err
+	}
+	return <-ch
+}
+
+func (app *appEnv) router() http.Handler {
+	routes := clogger.Middleware(
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/plain")
+			io.WriteString(w, "Hello, World!")
+		}),
+	)
+	return routes
 }
