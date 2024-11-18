@@ -14,6 +14,7 @@ func (app *appEnv) router() http.Handler {
 	srv := http.NewServeMux()
 	srv.Handle("GET /", app.notFound())
 	srv.Handle("GET /api/healthcheck", app.healthCheck())
+	srv.Handle("POST /comment", app.postComment())
 
 	fs.WalkDir(static.FS, ".", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {

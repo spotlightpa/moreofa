@@ -36,7 +36,8 @@ func CLI(args []string) error {
 
 func (app *appEnv) ParseArgs(args []string) error {
 	fl := flag.NewFlagSet(AppName, flag.ContinueOnError)
-	fl.StringVar(&app.addr, "port", cmp.Or(os.Getenv("PORT"), ":58448"), "")
+	fl.StringVar(&app.port, "port", cmp.Or(os.Getenv("PORT"), ":58448"), "")
+	fl.StringVar(&app.dbname, "db", "comments.db", "")
 	clogger.UseDevLogger()
 	fl.Func("level", "log level", func(s string) error {
 		l, _ := strconv.Atoi(s)
@@ -66,15 +67,21 @@ Options:
 }
 
 type appEnv struct {
-	addr string
+	port   string
+	dbname string
+	srv    *service
 }
 
 func (app *appEnv) Exec(ctx context.Context) (err error) {
 	defer func() { clogger.Logger.Info("done") }()
 
+	if err := app.newService(); err != nil {
+		return err
+	}
+
 	handler := app.router()
 	srv := &http.Server{
-		Addr:              app.addr,
+		Addr:              app.port,
 		Handler:           handler,
 		BaseContext:       func(net.Listener) context.Context { return ctx },
 		ReadHeaderTimeout: 5 * time.Second,
@@ -90,7 +97,7 @@ func (app *appEnv) Exec(ctx context.Context) (err error) {
 		defer stop()
 		ch <- srv.Shutdown(shutdownCtx)
 	}()
-	clogger.Logger.Info("starting", "port", app.addr)
+	clogger.Logger.Info("starting", "port", app.port)
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		return err
 	}
