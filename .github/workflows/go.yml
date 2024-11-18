@@ -12,5 +12,7 @@ jobs:
           go-version: stable
       - name: Get dependencies
         run: go mod download
+      - name: Check go.mod
+        run: go mod tidy -diff
       - name: Test
         run: go test -v ./...
