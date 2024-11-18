@@ -5,7 +5,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
 	"log/slog"
 	"net"
 	"net/http"
@@ -96,14 +95,4 @@ func (app *appEnv) Exec(ctx context.Context) (err error) {
 		return err
 	}
 	return <-ch
-}
-
-func (app *appEnv) router() http.Handler {
-	routes := clogger.Middleware(
-		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Content-Type", "text/plain")
-			io.WriteString(w, "Hello, World!")
-		}),
-	)
-	return routes
 }
