@@ -1,0 +1,12 @@
+name: SQL check
+
+on: [push, pull_request]
+
+jobs:
+  sqruff-lint:
+    name: Lint with sqruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: quarylabs/install-sqruff-cli-action@main
+      - run: sqruff lint sql

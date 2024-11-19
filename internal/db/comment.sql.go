@@ -11,20 +11,16 @@ import (
 
 const createComment = `-- name: CreateComment :one
 INSERT INTO
-  comment (
-    name,
-    contact,
-    message,
-    ip,
-    user_agent,
-    referrer,
-    host_page
-  )
+comment (subject, name, contact, message, ip, user_agent, referrer, host_page)
 VALUES
-  (?, ?, ?, ?, ?, ?, ?) RETURNING id, name, contact, message, ip, user_agent, referrer, host_page, created_at, updated_at
+(
+  ?, ?, ?, ?, ?, ?, ?, ?
+)
+RETURNING id, subject, name, contact, message, ip, user_agent, referrer, host_page, created_at, updated_at
 `
 
 type CreateCommentParams struct {
+	Subject   string
 	Name      string
 	Contact   string
 	Message   string
@@ -36,6 +32,7 @@ type CreateCommentParams struct {
 
 func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (Comment, error) {
 	row := q.db.QueryRowContext(ctx, createComment,
+		arg.Subject,
 		arg.Name,
 		arg.Contact,
 		arg.Message,
@@ -47,6 +44,7 @@ func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (C
 	var i Comment
 	err := row.Scan(
 		&i.ID,
+		&i.Subject,
 		&i.Name,
 		&i.Contact,
 		&i.Message,

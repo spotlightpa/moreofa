@@ -10,6 +10,7 @@ import (
 
 type Comment struct {
 	ID        int64
+	Subject   string
 	Name      string
 	Contact   string
 	Message   string
