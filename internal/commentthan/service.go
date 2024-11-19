@@ -21,7 +21,7 @@ func (app *appEnv) newService() error {
 	}
 	app.srv = &service{
 		db: dbase,
-		q:  db.New(dbase),
+		q:  db.New(db.Log(dbase)),
 	}
 	return nil
 }

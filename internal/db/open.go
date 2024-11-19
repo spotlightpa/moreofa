@@ -40,7 +40,7 @@ func Tx(ctx context.Context, db *sql.DB, opts *sql.TxOptions, cb func(*Queries) 
 		tx.Rollback()
 		panic(panicking)
 	}()
-	q := New(tx)
+	q := New(Log(tx))
 	if err = cb(q); err != nil {
 		return tx.Rollback()
 	}
