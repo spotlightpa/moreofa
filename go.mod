@@ -4,6 +4,7 @@ go 1.23
 
 require (
 	github.com/amacneil/dbmate/v2 v2.23.0
+	github.com/carlmjohnson/be v0.23.2
 	github.com/carlmjohnson/exitcode v0.20.2
 	github.com/carlmjohnson/flagx v0.22.2
 	github.com/carlmjohnson/requests v0.24.2
