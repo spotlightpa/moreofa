@@ -8,6 +8,7 @@ import (
 
 	"github.com/earthboundkid/mid"
 	"github.com/spotlightpa/moreofa/internal/db"
+	"github.com/spotlightpa/moreofa/internal/errx"
 	"github.com/spotlightpa/moreofa/static"
 )
 
@@ -30,7 +31,7 @@ func (app *appEnv) healthCheck() mid.Controller {
 func (app *appEnv) postComment() mid.Controller {
 	return func(w http.ResponseWriter, r *http.Request) http.Handler {
 		if err := r.ParseForm(); err != nil {
-			return app.replyError(err)
+			return app.replyError(errx.E{S: http.StatusBadRequest, E: err})
 		}
 		name := r.PostForm.Get("name")
 		contact := r.PostForm.Get("contact")
