@@ -3,6 +3,9 @@ package commentthan
 import (
 	"database/sql"
 
+	"github.com/earthboundkid/versioninfo/v2"
+	"github.com/getsentry/sentry-go"
+	"github.com/spotlightpa/moreofa/internal/clogger"
 	"github.com/spotlightpa/moreofa/internal/db"
 )
 
@@ -12,6 +15,14 @@ type service struct {
 }
 
 func (app *appEnv) newService() error {
+	clogger.UseDevLogger()
+	if app.sentryDSN != "" {
+		clogger.UseProdLogger()
+		sentry.Init(sentry.ClientOptions{
+			Dsn:     app.sentryDSN,
+			Release: versioninfo.Revision,
+		})
+	}
 	if err := db.Migrate(app.dbname); err != nil {
 		return err
 	}

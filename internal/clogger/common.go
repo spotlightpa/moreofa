@@ -21,7 +21,7 @@ func init() {
 }
 
 func removeTime(groups []string, a slog.Attr) slog.Attr {
-	// Netlify already logs time
+	// Fly.io already logs time
 	if a.Key == slog.TimeKey && len(groups) == 0 {
 		a.Key = ""
 		a.Value = slog.Value{}
@@ -29,12 +29,12 @@ func removeTime(groups []string, a slog.Attr) slog.Attr {
 	return a
 }
 
-func UseLambdaLogger() {
+func UseProdLogger() {
 	opts := slog.HandlerOptions{
 		Level:       Level,
 		ReplaceAttr: removeTime,
 	}
-	Logger = slog.New(slog.NewTextHandler(os.Stderr, &opts))
+	Logger = slog.New(slog.NewTextHandler(colorize{os.Stderr}, &opts))
 	slog.SetDefault(Logger)
 }
 
