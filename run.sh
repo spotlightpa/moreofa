@@ -93,7 +93,7 @@ function format:sh() {
 }
 
 function format:sql() {
-	sqruff fix sql
+	sqruff fix --force sql
 }
 
 function db:copy-prod() {
