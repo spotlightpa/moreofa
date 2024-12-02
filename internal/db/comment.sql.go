@@ -11,18 +11,21 @@ import (
 
 const createComment = `-- name: CreateComment :one
 INSERT INTO
-comment (subject, name, contact, message, ip, user_agent, referrer, host_page)
+comment (
+  name, contact, subject, cc, message, ip, user_agent, referrer, host_page
+)
 VALUES
 (
-  ?, ?, ?, ?, ?, ?, ?, ?
+  ?, ?, ?, ?, ?, ?, ?, ?, ?
 )
-RETURNING id, subject, name, contact, message, ip, user_agent, referrer, host_page, created_at, updated_at
+RETURNING id, name, contact, subject, cc, message, ip, user_agent, referrer, host_page, created_at, modified_at
 `
 
 type CreateCommentParams struct {
-	Subject   string
 	Name      string
 	Contact   string
+	Subject   string
+	Cc        string
 	Message   string
 	Ip        string
 	UserAgent string
@@ -32,9 +35,10 @@ type CreateCommentParams struct {
 
 func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (Comment, error) {
 	row := q.db.QueryRowContext(ctx, createComment,
-		arg.Subject,
 		arg.Name,
 		arg.Contact,
+		arg.Subject,
+		arg.Cc,
 		arg.Message,
 		arg.Ip,
 		arg.UserAgent,
@@ -44,16 +48,68 @@ func (q *Queries) CreateComment(ctx context.Context, arg CreateCommentParams) (C
 	var i Comment
 	err := row.Scan(
 		&i.ID,
-		&i.Subject,
 		&i.Name,
 		&i.Contact,
+		&i.Subject,
+		&i.Cc,
 		&i.Message,
 		&i.Ip,
 		&i.UserAgent,
 		&i.Referrer,
 		&i.HostPage,
 		&i.CreatedAt,
-		&i.UpdatedAt,
+		&i.ModifiedAt,
 	)
 	return i, err
+}
+
+const listComments = `-- name: ListComments :many
+;
+
+SELECT id, name, contact, subject, cc, message, ip, user_agent, referrer, host_page, created_at, modified_at
+FROM comment
+ORDER BY modified_at DESC
+LIMIT ?
+OFFSET ?
+`
+
+type ListCommentsParams struct {
+	Limit  int64
+	Offset int64
+}
+
+func (q *Queries) ListComments(ctx context.Context, arg ListCommentsParams) ([]Comment, error) {
+	rows, err := q.db.QueryContext(ctx, listComments, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Comment
+	for rows.Next() {
+		var i Comment
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Contact,
+			&i.Subject,
+			&i.Cc,
+			&i.Message,
+			&i.Ip,
+			&i.UserAgent,
+			&i.Referrer,
+			&i.HostPage,
+			&i.CreatedAt,
+			&i.ModifiedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

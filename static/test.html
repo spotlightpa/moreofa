@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Test</title>
+  </head>
+<body>
+  <form
+    action="/comment"
+    method="post"
+  >
+    <input name="bot-field" placeholder="bot-field" />
+    <input
+      class="input"
+      type="text"
+      name="host_page"
+      value="Spotlight PA"
+    />
+    <input
+      id="{{ $idFrom }}"
+      class="spl-input"
+      type="text"
+      placeholder="Your Name"
+      name="name"
+    />
+    <input
+      id="{{ $idEmail }}"
+      class="spl-input"
+      type="email"
+      placeholder="Email address"
+      name="email"
+    />
+    <input name="CC" placeholder="CC" />
+    <input name="subject" placeholder="subject" />
+    <input
+      type="checkbox"
+      name="anonymous"
+    />
+    <textarea
+      placeholder="comment"
+      name="comment"
+    ></textarea>
+
+    <button type="submit" class="btn-signup">
+      {{ $cta }}
+    </button>
+  </form>
+</body>
+</html>

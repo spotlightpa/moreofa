@@ -9,15 +9,16 @@ import (
 )
 
 type Comment struct {
-	ID        int64
-	Subject   string
-	Name      string
-	Contact   string
-	Message   string
-	Ip        string
-	UserAgent string
-	Referrer  string
-	HostPage  string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID         int64
+	Name       string
+	Contact    string
+	Subject    string
+	Cc         string
+	Message    string
+	Ip         string
+	UserAgent  string
+	Referrer   string
+	HostPage   string
+	CreatedAt  time.Time
+	ModifiedAt time.Time
 }
