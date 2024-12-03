@@ -14,9 +14,10 @@ type service struct {
 	q  *db.Queries
 }
 
-func (app *appEnv) newService() error {
-	clogger.UseDevLogger()
-	if app.sentryDSN != "" {
+func (app *appEnv) configureService() error {
+	if app.sentryDSN == "" {
+		clogger.UseDevLogger()
+	} else {
 		clogger.UseProdLogger()
 		sentry.Init(sentry.ClientOptions{
 			Dsn:     app.sentryDSN,
@@ -30,9 +31,15 @@ func (app *appEnv) newService() error {
 	if err != nil {
 		return err
 	}
-	app.srv = &service{
+	app.svc = &service{
 		db: dbase,
 		q:  db.New(db.Log(dbase)),
 	}
 	return nil
+}
+
+func (app *appEnv) closeService() {
+	if err := app.svc.db.Close(); err != nil {
+		clogger.Logger.Error("closeService", "error", err)
+	}
 }

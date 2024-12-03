@@ -53,7 +53,7 @@ func (app *appEnv) postComment() mid.Controller {
 			req.Message = "I wish to remain anonymous.\n\n" + req.Message
 		}
 
-		if err := db.Tx(r.Context(), app.srv.db, &sql.TxOptions{ReadOnly: false}, func(qtx *db.Queries) error {
+		if err := db.Tx(r.Context(), app.svc.db, &sql.TxOptions{ReadOnly: false}, func(qtx *db.Queries) error {
 			_, err := qtx.CreateComment(r.Context(), db.CreateCommentParams{
 				Name:      req.Name,
 				Contact:   req.Contact,
