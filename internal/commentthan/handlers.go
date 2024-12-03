@@ -10,7 +10,7 @@ import (
 
 func (app *appEnv) replyError(err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		clogger.Logger.ErrorContext(r.Context(), "error", "error", err)
+		clogger.FromContext(r.Context()).ErrorContext(r.Context(), "error", "error", err)
 		w.WriteHeader(errx.StatusCode(err))
 		io.WriteString(w, errx.UserMessage(err))
 	})
