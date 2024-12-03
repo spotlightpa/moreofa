@@ -1,0 +1,16 @@
+[
+  {
+    "ID": 0,
+    "Name": "",
+    "Contact": "",
+    "Subject": "",
+    "Cc": "",
+    "Message": "",
+    "Ip": "1.2.3.4",
+    "UserAgent": "Go-http-client/1.1",
+    "Referrer": "",
+    "HostPage": "",
+    "CreatedAt": "1969-07-20T20:17:40Z",
+    "ModifiedAt": "1969-07-20T20:17:40Z"
+  }
+]
