@@ -70,15 +70,16 @@ type appEnv struct {
 	port      string
 	dbname    string
 	sentryDSN string
-	srv       *service
+	svc       *service
 }
 
 func (app *appEnv) Exec(ctx context.Context) (err error) {
 	defer func() { clogger.Logger.Info("done") }()
 
-	if err := app.newService(); err != nil {
+	if err := app.configureService(); err != nil {
 		return err
 	}
+	defer app.closeService()
 
 	handler := app.router()
 	srv := &http.Server{
