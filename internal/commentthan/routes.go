@@ -47,13 +47,14 @@ func (app *appEnv) postComment() mid.Controller {
 			BotField  string `schema:"bot-field"`
 		}
 		if err := decoder.Decode(&req, r.PostForm); err != nil {
-			return app.replyError(err)
+			return app.replyError(errx.E{S: http.StatusBadRequest, E: err})
 		}
 		if req.Anonymous {
 			req.Message = "I wish to remain anonymous.\n\n" + req.Message
 		}
-
+		l := clogger.FromContext(r.Context())
 		if err := db.Tx(r.Context(), app.svc.db, &sql.TxOptions{ReadOnly: false}, func(qtx *db.Queries) error {
+			l.InfoContext(r.Context(), "postComment", "contact", req.Contact, "req_ip", r.RemoteAddr, "req_agent", r.UserAgent())
 			_, err := qtx.CreateComment(r.Context(), db.CreateCommentParams{
 				Name:      req.Name,
 				Contact:   req.Contact,
@@ -69,11 +70,6 @@ func (app *appEnv) postComment() mid.Controller {
 		}); err != nil {
 			return app.replyError(err)
 		}
-		v, err := app.srv.q.ListComments(r.Context(), db.ListCommentsParams{
-			Limit:  2,
-			Offset: 0,
-		})
-		clogger.FromContext(r.Context()).InfoContext(r.Context(), "table", "v", v, "e", err)
 		io.WriteString(w, "ok")
 		return nil
 	}
