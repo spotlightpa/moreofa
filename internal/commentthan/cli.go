@@ -38,6 +38,7 @@ func (app *appEnv) ParseArgs(args []string) error {
 	fl := flag.NewFlagSet(AppName, flag.ContinueOnError)
 	fl.StringVar(&app.port, "port", cmp.Or(os.Getenv("PORT"), ":58448"), "")
 	fl.StringVar(&app.dbname, "db", "comments.db", "")
+	fl.StringVar(&app.redirectSuccess, "redirect-success", "https://www.spotlightpa.org/contact/thanks/", "")
 	fl.StringVar(&app.sentryDSN, "sentry-dsn", "", "DSN `pseudo-URL` for Sentry")
 	fl.Func("level", "log level", func(s string) error {
 		l, _ := strconv.Atoi(s)
@@ -67,10 +68,11 @@ Options:
 }
 
 type appEnv struct {
-	port      string
-	dbname    string
-	sentryDSN string
-	svc       *service
+	port            string
+	dbname          string
+	sentryDSN       string
+	svc             *service
+	redirectSuccess string
 }
 
 func (app *appEnv) Exec(ctx context.Context) (err error) {

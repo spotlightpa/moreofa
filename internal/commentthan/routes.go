@@ -32,7 +32,7 @@ func (app *appEnv) healthCheck() mid.Controller {
 func (app *appEnv) postComment() mid.Controller {
 	return func(w http.ResponseWriter, r *http.Request) http.Handler {
 		if err := r.ParseForm(); err != nil {
-			return app.replyError(errx.E{S: http.StatusBadRequest, E: err})
+			return app.replyHTMLErr(errx.E{S: http.StatusBadRequest, E: err})
 		}
 		decoder := schema.NewDecoder()
 		decoder.IgnoreUnknownKeys(true)
@@ -47,7 +47,7 @@ func (app *appEnv) postComment() mid.Controller {
 			BotField  string `schema:"bot-field"`
 		}
 		if err := decoder.Decode(&req, r.PostForm); err != nil {
-			return app.replyError(errx.E{S: http.StatusBadRequest, E: err})
+			return app.replyHTMLErr(errx.E{S: http.StatusBadRequest, E: err})
 		}
 		if req.Anonymous {
 			req.Message = "I wish to remain anonymous.\n\n" + req.Message
@@ -68,9 +68,10 @@ func (app *appEnv) postComment() mid.Controller {
 			})
 			return err
 		}); err != nil {
-			return app.replyError(err)
+			return app.replyHTMLErr(err)
 		}
-		io.WriteString(w, "ok")
+
+		http.Redirect(w, r, app.redirectSuccess, http.StatusSeeOther)
 		return nil
 	}
 }

@@ -35,10 +35,13 @@ func TestPostComment(t *testing.T) {
 	h := app.router()
 	srv := httptest.NewServer(h)
 	defer srv.Close()
+	srv.Client().CheckRedirect = requests.NoFollow
 
-	be.NilErr(t, requests.
+	rb := requests.
 		New(reqtest.Server(srv)).
-		Path("/comment").
+		Path("/comment")
+
+	be.NilErr(t, rb.Clone().
 		BodyForm(url.Values{
 			"bot-field": []string{},
 			"host_page": []string{"host_page1"},
@@ -49,11 +52,10 @@ func TestPostComment(t *testing.T) {
 			"anonymous": []string{},
 			"comment":   []string{"comment1"},
 		}).
+		CheckStatus(303).
 		Fetch(ctx))
 
-	be.NilErr(t, requests.
-		New(reqtest.Server(srv)).
-		Path("/comment").
+	be.NilErr(t, rb.Clone().
 		BodyForm(url.Values{
 			"bot-field": []string{},
 			"host_page": []string{"host_page2"},
@@ -64,10 +66,18 @@ func TestPostComment(t *testing.T) {
 			"anonymous": []string{"1"},
 			"comment":   []string{"comment2"},
 		}).
+		CheckStatus(303).
+		Fetch(ctx))
+
+	be.NilErr(t, rb.Clone().
+		BodyForm(url.Values{
+			"anonymous": []string{"XXX"},
+		}).
+		CheckStatus(400).
 		Fetch(ctx))
 
 	comments, err := app.svc.q.ListComments(ctx, db.ListCommentsParams{
-		Limit:  2,
+		Limit:  3,
 		Offset: 0,
 	})
 	be.NilErr(t, err)
