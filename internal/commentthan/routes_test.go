@@ -3,6 +3,7 @@ package commentthan
 import (
 	"context"
 	"net/http/httptest"
+	"net/url"
 	"path/filepath"
 	"testing"
 	"time"
@@ -35,19 +36,43 @@ func TestPostComment(t *testing.T) {
 	srv := httptest.NewServer(h)
 	defer srv.Close()
 
-	err := requests.
+	be.NilErr(t, requests.
 		New(reqtest.Server(srv)).
 		Path("/comment").
-		BodyForm(nil).
-		Fetch(ctx)
-	be.NilErr(t, err)
+		BodyForm(url.Values{
+			"bot-field": []string{},
+			"host_page": []string{"host_page1"},
+			"name":      []string{"name1"},
+			"email":     []string{"email1"},
+			"CC":        []string{"CC1"},
+			"subject":   []string{"subject1"},
+			"anonymous": []string{},
+			"comment":   []string{"comment1"},
+		}).
+		Fetch(ctx))
+
+	be.NilErr(t, requests.
+		New(reqtest.Server(srv)).
+		Path("/comment").
+		BodyForm(url.Values{
+			"bot-field": []string{},
+			"host_page": []string{"host_page2"},
+			"name":      []string{"name2"},
+			"email":     []string{"email2"},
+			"CC":        []string{"CC2"},
+			"subject":   []string{"subject2"},
+			"anonymous": []string{"1"},
+			"comment":   []string{"comment2"},
+		}).
+		Fetch(ctx))
+
 	comments, err := app.svc.q.ListComments(ctx, db.ListCommentsParams{
-		Limit:  1,
+		Limit:  2,
 		Offset: 0,
 	})
+	be.NilErr(t, err)
 	for i := range comments {
 		clearComment(&comments[i])
 	}
-	be.NilErr(t, err)
 	testfile.EqualJSON(t, "testdata/comments.json", comments)
 }
