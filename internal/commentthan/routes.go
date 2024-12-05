@@ -2,6 +2,7 @@ package commentthan
 
 import (
 	"database/sql"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -24,6 +25,15 @@ func (app *appEnv) notFound() mid.Controller {
 
 func (app *appEnv) healthCheck() mid.Controller {
 	return func(w http.ResponseWriter, r *http.Request) http.Handler {
+		w.Header().Set("Content-Type", "text/plain")
+		io.WriteString(w, "OK")
+		return nil
+	}
+}
+
+func (app *appEnv) sentryCheck() mid.Controller {
+	return func(w http.ResponseWriter, r *http.Request) http.Handler {
+		clogger.LogRequestErr(r, errors.New("sentry check"))
 		w.Header().Set("Content-Type", "text/plain")
 		io.WriteString(w, "OK")
 		return nil
