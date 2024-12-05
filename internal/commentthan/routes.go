@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/earthboundkid/mid"
 	"github.com/gorilla/schema"
@@ -55,13 +56,14 @@ func (app *appEnv) postComment() mid.Controller {
 		l := clogger.FromContext(r.Context())
 		if err := db.Tx(r.Context(), app.svc.db, &sql.TxOptions{ReadOnly: false}, func(qtx *db.Queries) error {
 			l.InfoContext(r.Context(), "postComment", "contact", req.Contact, "req_ip", r.RemoteAddr, "req_agent", r.UserAgent())
+			ip, _, _ := strings.Cut(r.RemoteAddr, ":")
 			_, err := qtx.CreateComment(r.Context(), db.CreateCommentParams{
 				Name:      req.Name,
 				Contact:   req.Contact,
 				Subject:   req.Subject,
 				Cc:        req.CC,
 				Message:   req.Message,
-				Ip:        r.RemoteAddr,
+				Ip:        ip,
 				UserAgent: r.UserAgent(),
 				Referrer:  r.Referer(),
 				HostPage:  req.HostPage,
@@ -70,7 +72,6 @@ func (app *appEnv) postComment() mid.Controller {
 		}); err != nil {
 			return app.replyHTMLErr(err)
 		}
-
 		http.Redirect(w, r, app.redirectSuccess, http.StatusSeeOther)
 		return nil
 	}
