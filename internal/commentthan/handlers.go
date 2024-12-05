@@ -11,7 +11,7 @@ import (
 
 func (app *appEnv) replyHTMLErr(err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		clogger.LogErr(r.Context(), err)
+		clogger.LogRequestErr(r, err)
 		code := errx.StatusCode(err)
 		var buf bytes.Buffer
 		if err := layouts.Error.Execute(&buf, struct {
@@ -23,13 +23,13 @@ func (app *appEnv) replyHTMLErr(err error) http.Handler {
 			StatusCode: code,
 			Message:    errx.UserMessage(err),
 		}); err != nil {
-			clogger.LogErr(r.Context(), err)
+			clogger.LogRequestErr(r, err)
 			return
 		}
 		w.Header().Set("Content-Type", "text/html")
 		w.WriteHeader(code)
 		if _, err := buf.WriteTo(w); err != nil {
-			clogger.LogErr(r.Context(), err)
+			clogger.LogRequestErr(r, err)
 			return
 		}
 	})
