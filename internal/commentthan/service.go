@@ -1,6 +1,7 @@
 package commentthan
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/earthboundkid/versioninfo/v2"
@@ -19,10 +20,14 @@ func (app *appEnv) configureService() error {
 		clogger.UseDevLogger()
 	} else {
 		clogger.UseProdLogger()
-		sentry.Init(sentry.ClientOptions{
+		if err := sentry.Init(sentry.ClientOptions{
 			Dsn:     app.sentryDSN,
 			Release: versioninfo.Revision,
-		})
+		}); err != nil {
+			clogger.LogErr(context.Background(), err)
+		} else {
+			clogger.Logger.Info("Sentry enabled")
+		}
 	}
 	if err := db.Migrate(app.dbname); err != nil {
 		return err
