@@ -17,6 +17,7 @@ import (
 
 func clearComment(c *db.Comment) {
 	c.ID = 0
+	c.Ip = "127.0.0.1"
 	c.CreatedAt = time.Date(1969, 7, 20, 20, 17, 40, 0, time.UTC)
 	c.ModifiedAt = time.Date(1969, 7, 20, 20, 17, 40, 0, time.UTC)
 }
