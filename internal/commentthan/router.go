@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/earthboundkid/mid"
+	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/spotlightpa/moreofa/internal/clogger"
 	"github.com/spotlightpa/moreofa/static"
 )
@@ -28,10 +29,12 @@ func (app *appEnv) router() http.Handler {
 
 	const fiveMB = 5 * 1 << 20
 	baseMW := mid.Stack{
+		sentryhttp.New(sentryhttp.Options{}).Handle,
 		clogger.Middleware,
 		maxBytesMiddleware(fiveMB),
 		timeoutMiddleware(10 * time.Second),
 		versionMiddleware,
 	}
+
 	return baseMW.Handler(srv)
 }
