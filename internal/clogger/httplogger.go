@@ -1,6 +1,7 @@
 package clogger
 
 import (
+	"errors"
 	"net/http"
 	"time"
 
@@ -11,8 +12,7 @@ var HTTPTransport http.RoundTripper
 
 func init() {
 	HTTPTransport = requests.LogTransport(http.DefaultTransport, logReq)
-	http.DefaultTransport = HTTPTransport
-	http.DefaultClient.Timeout = 5 * time.Second
+	http.DefaultTransport = requests.ErrorTransport(errors.New("use of http.DefaultTransport"))
 }
 
 func logReq(req *http.Request, res *http.Response, err error, duration time.Duration) {
