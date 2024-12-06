@@ -30,7 +30,7 @@ func (app *appEnv) configureService() error {
 		}); err != nil {
 			clogger.LogErr(context.Background(), err)
 		} else {
-			clogger.Logger.Info("configureService", "Sentry-enabled", true)
+			clogger.Logger.Info("configureService", "Sentry enabled", true)
 		}
 	}
 	if err := db.Migrate(app.dbname); err != nil {
