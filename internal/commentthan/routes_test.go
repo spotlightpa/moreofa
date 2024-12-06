@@ -22,20 +22,51 @@ func clearComment(c *db.Comment) {
 	c.ModifiedAt = time.Date(1969, 7, 20, 20, 17, 40, 0, time.UTC)
 }
 
-func TestPostComment(t *testing.T) {
+func testApp(t *testing.T) *appEnv {
 	dir := t.TempDir()
 	dbname := filepath.Join(dir, "test.db")
-	ctx := context.Background()
 	app := appEnv{
 		dbname: dbname,
 	}
 	be.NilErr(t, app.configureService())
-	defer app.closeService()
+	t.Cleanup(func() {
+		app.closeService()
+	})
+	return &app
+}
 
+func (app *appEnv) testRouter() *httptest.Server {
 	h := app.router()
 	srv := httptest.NewServer(h)
-	defer srv.Close()
 	srv.Client().CheckRedirect = requests.NoFollow
+	return srv
+}
+
+func TestHealthcheck(t *testing.T) {
+	t.Parallel()
+	app := testApp(t)
+	ctx := context.Background()
+
+	srv := app.testRouter()
+	defer srv.Close()
+
+	var body string
+	rb := requests.
+		New(reqtest.Server(srv)).
+		Path("/api/healthcheck").
+		ToString(&body)
+
+	be.NilErr(t, rb.Fetch(ctx))
+	be.Equal(t, "OK", body)
+}
+
+func TestPostComment(t *testing.T) {
+	t.Parallel()
+	app := testApp(t)
+	ctx := context.Background()
+
+	srv := app.testRouter()
+	defer srv.Close()
 
 	rb := requests.
 		New(reqtest.Server(srv)).
