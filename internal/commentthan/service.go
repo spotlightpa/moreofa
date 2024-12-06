@@ -3,6 +3,7 @@ package commentthan
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/earthboundkid/versioninfo/v2"
 	"github.com/getsentry/sentry-go"
@@ -18,15 +19,18 @@ type service struct {
 func (app *appEnv) configureService() error {
 	if app.sentryDSN == "" {
 		clogger.UseDevLogger()
+		clogger.Logger.Warn("configureService", "Sentry enabled", false)
 	} else {
 		clogger.UseProdLogger()
+		clogger.Logger.Info("configureService", "Sentry", app.sentryDSN)
 		if err := sentry.Init(sentry.ClientOptions{
-			Dsn:     app.sentryDSN,
-			Release: versioninfo.Revision,
+			Dsn:       app.sentryDSN,
+			Release:   versioninfo.Revision,
+			Transport: &sentry.HTTPSyncTransport{Timeout: 5 * time.Second},
 		}); err != nil {
 			clogger.LogErr(context.Background(), err)
 		} else {
-			clogger.Logger.Info("Sentry enabled")
+			clogger.Logger.Info("configureService", "Sentry enabled", true)
 		}
 	}
 	if err := db.Migrate(app.dbname); err != nil {
@@ -47,4 +51,5 @@ func (app *appEnv) closeService() {
 	if err := app.svc.db.Close(); err != nil {
 		clogger.Logger.Error("closeService", "error", err)
 	}
+	sentry.Flush(5 * time.Second)
 }
