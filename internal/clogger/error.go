@@ -11,7 +11,8 @@ func LogErr(ctx context.Context, err error) {
 	l := FromContext(ctx)
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
 		hub.WithScope(func(scope *sentry.Scope) {
-			hub.CaptureException(err)
+			e := hub.CaptureException(err)
+			l.InfoContext(ctx, "sentry", "id", *e)
 		})
 	} else {
 		l.Warn("sentry not in context")
@@ -25,7 +26,8 @@ func LogRequestErr(r *http.Request, err error) {
 	if hub := sentry.GetHubFromContext(ctx); hub != nil {
 		hub.WithScope(func(scope *sentry.Scope) {
 			scope.SetRequest(r)
-			hub.CaptureException(err)
+			e := hub.CaptureException(err)
+			l.InfoContext(ctx, "sentry", "id", *e)
 		})
 	} else {
 		l.Warn("sentry not in context")
