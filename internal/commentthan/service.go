@@ -3,6 +3,7 @@ package commentthan
 import (
 	"context"
 	"database/sql"
+	"os"
 	"time"
 
 	"github.com/earthboundkid/versioninfo/v2"
@@ -19,18 +20,17 @@ type service struct {
 func (app *appEnv) configureService() error {
 	if app.sentryDSN == "" {
 		clogger.UseDevLogger()
-		clogger.Logger.Warn("configureService", "Sentry enabled", false)
+		clogger.Logger.Warn("configureService", "Sentry-enabled", false)
 	} else {
 		clogger.UseProdLogger()
-		clogger.Logger.Info("configureService", "Sentry", app.sentryDSN)
 		if err := sentry.Init(sentry.ClientOptions{
-			Dsn:       app.sentryDSN,
-			Release:   versioninfo.Revision,
-			Transport: &sentry.HTTPSyncTransport{Timeout: 5 * time.Second},
+			Dsn:        app.sentryDSN,
+			Release:    versioninfo.Revision,
+			ServerName: os.Getenv("FLY_MACHINE_ID"),
 		}); err != nil {
 			clogger.LogErr(context.Background(), err)
 		} else {
-			clogger.Logger.Info("configureService", "Sentry enabled", true)
+			clogger.Logger.Info("configureService", "Sentry-enabled", true)
 		}
 	}
 	if err := db.Migrate(app.dbname); err != nil {
