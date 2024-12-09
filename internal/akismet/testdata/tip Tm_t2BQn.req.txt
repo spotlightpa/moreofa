@@ -1,0 +1,5 @@
+POST /1.1/comment-check HTTP/1.1
+Host: rest.akismet.com
+Content-Type: application/x-www-form-urlencoded
+
+api_key=abc123&blog=https%3A%2F%2Fwww.spotlightpa.org&comment_content=I+have+a+tip+about+Pennsylvannia+political+corruption.&comment_context%5B%5D=Pennsylvannia&comment_type=contact%E2%80%91form
