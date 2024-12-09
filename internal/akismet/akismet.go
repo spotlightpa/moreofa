@@ -3,6 +3,7 @@ package akismet
 import (
 	"context"
 	"errors"
+	"fmt"
 	"maps"
 	"net/http"
 	"net/url"
@@ -172,13 +173,16 @@ func (cl Client) Check(ctx context.Context, c Comment) (CommentKind, error) {
 	if err != nil {
 		return UnknownKind, err
 	}
-	if body != "true" {
-		return HamKind, nil
-	}
 	if headers.Get("X-Akismet-Pro-Tip") == "discard" {
 		return TrashKind, nil
 	}
-	return SpamKind, nil
+	if body == "false" {
+		return HamKind, nil
+	}
+	if body == "true" {
+		return SpamKind, nil
+	}
+	return UnknownKind, fmt.Errorf("bad response: %q", body)
 }
 
 const (

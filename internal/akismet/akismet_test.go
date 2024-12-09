@@ -14,7 +14,7 @@ func TestClient(t *testing.T) {
 	tb := be.Relaxed(t)
 	ctx := context.Background()
 	cl := &http.Client{
-		Transport: reqtest.Caching(nil, "testdata"),
+		Transport: reqtest.Replay("testdata"),
 	}
 	akcl := akismet.New("https://www.spotlightpa.org", "abc123", cl)
 	ok, err := akcl.Verify(ctx)
@@ -53,4 +53,9 @@ func TestClient(t *testing.T) {
 		IsTest: true,
 	})
 	be.NilErr(tb, err)
+
+	akcl = akismet.New("https://www.spotlightpa.org", "", cl)
+	kind, err = akcl.Check(ctx, akismet.Comment{})
+	be.Nonzero(tb, err)
+	be.Equal(tb, akismet.UnknownKind, kind)
 }
