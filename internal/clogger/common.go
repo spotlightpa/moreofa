@@ -5,10 +5,14 @@ import (
 	"cmp"
 	"log/slog"
 	"os"
+	"sync"
 	"time"
 )
 
-var Logger *slog.Logger = slog.New(slog.NewTextHandler(initMe{}, nil))
+var (
+	Logger   *slog.Logger = slog.New(slog.NewTextHandler(initMe{}, nil))
+	loggerMu sync.Mutex
+)
 
 type initMe struct{}
 
@@ -34,6 +38,8 @@ func UseProdLogger() {
 		Level:       Level,
 		ReplaceAttr: removeTime,
 	}
+	loggerMu.Lock()
+	defer loggerMu.Unlock()
 	Logger = slog.New(slog.NewTextHandler(colorize{os.Stderr}, &opts))
 	slog.SetDefault(Logger)
 }
@@ -51,6 +57,8 @@ func UseDevLogger() {
 		Level:       Level,
 		ReplaceAttr: shortenTime,
 	}
+	loggerMu.Lock()
+	defer loggerMu.Unlock()
 	Logger = slog.New(slog.NewTextHandler(colorize{os.Stderr}, &opts))
 	slog.SetDefault(Logger)
 }
