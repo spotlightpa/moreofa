@@ -1,0 +1,5 @@
+POST /1.1/comment-check HTTP/1.1
+Host: rest.akismet.com
+Content-Type: application/x-www-form-urlencoded
+
+api_key=&blog=https%3A%2F%2Fwww.spotlightpa.org

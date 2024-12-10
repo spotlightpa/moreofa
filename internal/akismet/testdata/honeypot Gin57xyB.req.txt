@@ -1,0 +1,5 @@
+POST /1.1/comment-check HTTP/1.1
+Host: rest.akismet.com
+Content-Type: application/x-www-form-urlencoded
+
+api_key=abc123&blog=https%3A%2F%2Fwww.spotlightpa.org&comment_content=I+hope+this+message+finds+you+well.+At+Risk-FreewithMoney-BackGuarantee.com%2C+we+understand+that+navigating+the+financial+landscape+can+be+challenging%2C+and+finding+opportunities+with+real+potential+is+no+small+feat.+That%E2%80%99s+why+we%E2%80%99re+excited+to+present+you+with+a+unique+investment+opportunity+that+combines+transparency%2C+security%2C+and+unparalleled+growth+potential.&comment_context%5B%5D=Pennsylvannia&comment_type=contact%E2%80%91form&hidden_honeypot_field=true&honeypot_field_name=hidden_honeypot_field
