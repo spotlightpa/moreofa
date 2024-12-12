@@ -10,6 +10,7 @@ primary_region = 'ewr'
 [env]
 PORT = ":8080"
 GOMEMLIMIT = "512MiB"
+MOREOFA_LOCALHOST = "0"
 MOREOFA_DB = "/data/comments.db"
 
 [http_service]

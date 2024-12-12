@@ -26,7 +26,8 @@ func testService(t *testing.T) *service {
 	dir := t.TempDir()
 	dbname := filepath.Join(dir, "test.db")
 	app := appEnv{
-		dbname: dbname,
+		dbname:      dbname,
+		isLocalhost: true,
 	}
 	svc, err := app.configureService()
 	be.NilErr(t, err)
