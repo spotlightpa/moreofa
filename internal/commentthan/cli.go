@@ -40,6 +40,7 @@ func (app *appEnv) ParseArgs(args []string) error {
 	fl.StringVar(&app.dbname, "db", "comments.db", "")
 	fl.StringVar(&app.redirectSuccess, "redirect-success", "https://www.spotlightpa.org/contact/thanks/", "")
 	fl.StringVar(&app.sentryDSN, "sentry-dsn", "", "DSN `pseudo-URL` for Sentry")
+	fl.BoolVar(&app.isLocalhost, "localhost", true, "")
 	fl.Func("level", "log level", func(s string) error {
 		l, _ := strconv.Atoi(s)
 		clogger.Level.Set(slog.Level(l))
@@ -73,6 +74,7 @@ type appEnv struct {
 	sentryDSN       string
 	svc             *service
 	redirectSuccess string
+	isLocalhost     bool
 }
 
 func (app *appEnv) Exec(ctx context.Context) (err error) {

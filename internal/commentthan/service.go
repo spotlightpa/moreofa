@@ -22,11 +22,16 @@ type service struct {
 }
 
 func (app *appEnv) configureService() (*service, error) {
-	if app.sentryDSN == "" {
+	if app.isLocalhost {
 		clogger.UseDevLogger()
-		slog.Warn("configureService", "Sentry-enabled", false)
+		slog.Warn("configureService", "is-localhost", true)
 	} else {
 		clogger.UseProdLogger()
+		slog.Info("configureService", "is-localhost", false)
+	}
+	if app.sentryDSN == "" {
+		slog.Warn("configureService", "Sentry-enabled", false)
+	} else {
 		if err := sentry.Init(sentry.ClientOptions{
 			Dsn:        app.sentryDSN,
 			Release:    versioninfo.Revision,
