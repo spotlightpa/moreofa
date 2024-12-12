@@ -1,14 +1,19 @@
 package commentthan
 
 import (
+	"fmt"
 	"io/fs"
 	"net/http"
 	"time"
 
+	"github.com/dghubble/gologin/v2"
+	gologingoogle "github.com/dghubble/gologin/v2/google"
 	"github.com/earthboundkid/mid"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/spotlightpa/moreofa/internal/clogger"
 	"github.com/spotlightpa/moreofa/static"
+	"golang.org/x/oauth2"
+	oauth2google "golang.org/x/oauth2/google"
 )
 
 type router struct {
@@ -22,7 +27,7 @@ func (rr *router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	rr.h.ServeHTTP(w, r)
 }
 
-func (svc *service) router() http.Handler {
+func (app *appEnv) router(svc *service) http.Handler {
 	rr := &router{svc: svc}
 	srv := http.NewServeMux()
 	srv.Handle("GET /", rr.notFound())
@@ -48,6 +53,33 @@ func (svc *service) router() http.Handler {
 		timeoutMiddleware(10 * time.Second),
 		versionMiddleware,
 	}
+
+	// Add login handlers
+	redirectURL := "https://moreofa.spotlightpa.org/google-callback"
+	if app.isLocalhost {
+		redirectURL = fmt.Sprintf("http://localhost%s/google-callback", app.port)
+	}
+	oauthConf := &oauth2.Config{
+		ClientID:     app.googleClientID,
+		ClientSecret: app.googleClientSecret,
+		RedirectURL:  redirectURL,
+		Scopes:       []string{"profile", "email"},
+		Endpoint:     oauth2google.Endpoint,
+	}
+	cookieConf := gologin.DefaultCookieConfig
+	if app.isLocalhost {
+		cookieConf = gologin.DebugOnlyCookieConfig
+	}
+
+	loginRedirect := gologingoogle.LoginHandler(oauthConf, rr.googleCallbackError())
+	loginRedirect = gologingoogle.StateHandler(cookieConf, loginRedirect)
+	srv.Handle("GET /login/{$}", loginRedirect)
+
+	googleCallback := gologingoogle.CallbackHandler(oauthConf, rr.googleCallback(), rr.googleCallbackError())
+	googleCallback = gologingoogle.StateHandler(cookieConf, googleCallback)
+	googleCallback = svc.oauthClientMiddleware(googleCallback)
+	srv.Handle("GET /google-callback", googleCallback)
+
 	rr.h = baseMW.Handler(srv)
 	return rr
 }

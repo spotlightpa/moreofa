@@ -41,6 +41,8 @@ func (app *appEnv) ParseArgs(args []string) error {
 	fl.StringVar(&app.redirectSuccess, "redirect-success", "https://www.spotlightpa.org/contact/thanks/", "")
 	fl.StringVar(&app.sentryDSN, "sentry-dsn", "", "DSN `pseudo-URL` for Sentry")
 	fl.BoolVar(&app.isLocalhost, "localhost", true, "")
+	fl.StringVar(&app.googleClientID, "google-client-id", "", "")
+	fl.StringVar(&app.googleClientSecret, "google-client-secret", "", "")
 	fl.Func("level", "log level", func(s string) error {
 		l, _ := strconv.Atoi(s)
 		clogger.Level.Set(slog.Level(l))
@@ -69,12 +71,14 @@ Options:
 }
 
 type appEnv struct {
-	port            string
-	dbname          string
-	sentryDSN       string
-	svc             *service
-	redirectSuccess string
-	isLocalhost     bool
+	port               string
+	dbname             string
+	sentryDSN          string
+	svc                *service
+	redirectSuccess    string
+	isLocalhost        bool
+	googleClientID     string
+	googleClientSecret string
 }
 
 func (app *appEnv) Exec(ctx context.Context) (err error) {
@@ -85,7 +89,7 @@ func (app *appEnv) Exec(ctx context.Context) (err error) {
 	}
 	defer svc.closeService()
 
-	handler := svc.router()
+	handler := app.router(svc)
 	srv := &http.Server{
 		Addr:              app.port,
 		Handler:           handler,
