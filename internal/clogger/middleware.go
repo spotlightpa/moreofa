@@ -1,6 +1,7 @@
 package clogger
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -11,7 +12,7 @@ func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
-		ctx := NewContext(r.Context(), Logger)
+		ctx := NewContext(r.Context(), slog.Default())
 		r = r.WithContext(ctx)
 
 		defer func() {
@@ -21,7 +22,7 @@ func Middleware(next http.Handler) http.Handler {
 			if l2 := LevelThreshold(status, 400, 500); l2 > level {
 				level = l2
 			}
-			Logger.Log(r.Context(), level, "ServeHTTP",
+			slog.Default().Log(r.Context(), level, "ServeHTTP",
 				"req_method", r.Method,
 				"req_ip", r.RemoteAddr,
 				"req_path", r.RequestURI,

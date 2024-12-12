@@ -11,10 +11,8 @@ func UseTestLogger(t testing.TB) {
 		Level:       Level,
 		ReplaceAttr: removeTime,
 	}
-	loggerMu.Lock()
-	defer loggerMu.Unlock()
-	Logger = slog.New(slog.NewTextHandler(tWriter{t}, &opts))
-	slog.SetDefault(Logger)
+	logger := slog.New(slog.NewTextHandler(tWriter{t}, &opts))
+	slog.SetDefault(logger)
 }
 
 type tWriter struct {

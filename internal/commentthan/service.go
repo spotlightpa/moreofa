@@ -3,6 +3,7 @@ package commentthan
 import (
 	"context"
 	"database/sql"
+	"log/slog"
 	"os"
 	"time"
 
@@ -20,7 +21,7 @@ type service struct {
 func (app *appEnv) configureService() error {
 	if app.sentryDSN == "" {
 		clogger.UseDevLogger()
-		clogger.Logger.Warn("configureService", "Sentry-enabled", false)
+		slog.Warn("configureService", "Sentry-enabled", false)
 	} else {
 		clogger.UseProdLogger()
 		if err := sentry.Init(sentry.ClientOptions{
@@ -30,7 +31,7 @@ func (app *appEnv) configureService() error {
 		}); err != nil {
 			clogger.LogErr(context.Background(), err)
 		} else {
-			clogger.Logger.Info("configureService", "Sentry-enabled", true)
+			slog.Info("configureService", "Sentry-enabled", true)
 		}
 	}
 	if err := db.Migrate(app.dbname); err != nil {
@@ -49,7 +50,7 @@ func (app *appEnv) configureService() error {
 
 func (app *appEnv) closeService() {
 	if err := app.svc.db.Close(); err != nil {
-		clogger.Logger.Error("closeService", "error", err)
+		slog.Error("closeService", "error", err)
 	}
 	sentry.Flush(5 * time.Second)
 }
