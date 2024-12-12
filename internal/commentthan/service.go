@@ -15,12 +15,13 @@ import (
 )
 
 type service struct {
-	db *sql.DB
-	q  *db.Queries
-	cl *http.Client
+	db              *sql.DB
+	q               *db.Queries
+	cl              *http.Client
+	redirectSuccess string
 }
 
-func (app *appEnv) configureService() error {
+func (app *appEnv) configureService() (*service, error) {
 	if app.sentryDSN == "" {
 		clogger.UseDevLogger()
 		slog.Warn("configureService", "Sentry-enabled", false)
@@ -37,25 +38,25 @@ func (app *appEnv) configureService() error {
 		}
 	}
 	if err := db.Migrate(app.dbname); err != nil {
-		return err
+		return nil, err
 	}
 	dbase, err := db.Open(app.dbname)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	app.svc = &service{
+	return &service{
 		db: dbase,
 		q:  db.New(db.Log(dbase)),
 		cl: &http.Client{
 			Transport: clogger.HTTPTransport,
 			Timeout:   5 * time.Second,
 		},
-	}
-	return nil
+		redirectSuccess: app.redirectSuccess,
+	}, nil
 }
 
-func (app *appEnv) closeService() {
-	if err := app.svc.db.Close(); err != nil {
+func (svc *service) closeService() {
+	if err := svc.db.Close(); err != nil {
 		slog.Error("closeService", "error", err)
 	}
 	sentry.Flush(5 * time.Second)
