@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log/slog"
+	"net/http"
 	"os"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 type service struct {
 	db *sql.DB
 	q  *db.Queries
+	cl *http.Client
 }
 
 func (app *appEnv) configureService() error {
@@ -44,6 +46,10 @@ func (app *appEnv) configureService() error {
 	app.svc = &service{
 		db: dbase,
 		q:  db.New(db.Log(dbase)),
+		cl: &http.Client{
+			Transport: clogger.HTTPTransport,
+			Timeout:   5 * time.Second,
+		},
 	}
 	return nil
 }
