@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"log/slog"
 	"net/url"
 
-	"github.com/spotlightpa/moreofa/internal/clogger"
 	"github.com/spotlightpa/moreofa/sql/migrations"
 
 	"github.com/amacneil/dbmate/v2/pkg/dbmate"
@@ -61,9 +61,9 @@ func Migrate(name string) error {
 		return err
 	}
 	for _, m := range migrations {
-		clogger.Logger.Info("db.Migrate: found", "version", m.Version, "path", m.FilePath)
+		slog.Info("db.Migrate: found", "version", m.Version, "path", m.FilePath)
 	}
 
-	clogger.Logger.Info("db.Migrate: migrating")
+	slog.Info("db.Migrate: migrating")
 	return db.CreateAndMigrate()
 }

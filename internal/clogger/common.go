@@ -5,14 +5,14 @@ import (
 	"cmp"
 	"log/slog"
 	"os"
-	"sync"
 	"time"
 )
 
-var (
-	Logger   *slog.Logger = slog.New(slog.NewTextHandler(initMe{}, nil))
-	loggerMu sync.Mutex
-)
+func init() {
+	// Prevent failure to init default logger
+	l := slog.New(slog.NewTextHandler(initMe{}, nil))
+	slog.SetDefault(l)
+}
 
 type initMe struct{}
 
@@ -38,10 +38,8 @@ func UseProdLogger() {
 		Level:       Level,
 		ReplaceAttr: removeTime,
 	}
-	loggerMu.Lock()
-	defer loggerMu.Unlock()
-	Logger = slog.New(slog.NewTextHandler(colorize{os.Stderr}, &opts))
-	slog.SetDefault(Logger)
+	logger := slog.New(slog.NewTextHandler(colorize{os.Stderr}, &opts))
+	slog.SetDefault(logger)
 }
 
 func shortenTime(groups []string, a slog.Attr) slog.Attr {
@@ -57,10 +55,9 @@ func UseDevLogger() {
 		Level:       Level,
 		ReplaceAttr: shortenTime,
 	}
-	loggerMu.Lock()
-	defer loggerMu.Unlock()
-	Logger = slog.New(slog.NewTextHandler(colorize{os.Stderr}, &opts))
-	slog.SetDefault(Logger)
+
+	logger := slog.New(slog.NewTextHandler(colorize{os.Stderr}, &opts))
+	slog.SetDefault(logger)
 }
 
 func SpeedThreshold(val, warn, err time.Duration) string {

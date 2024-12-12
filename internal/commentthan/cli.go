@@ -29,7 +29,7 @@ func CLI(args []string) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	if err = app.Exec(ctx); err != nil {
-		clogger.Logger.Error("runtime error", "error", err)
+		slog.Error("runtime error", "error", err)
 	}
 	return err
 }
@@ -76,7 +76,7 @@ type appEnv struct {
 }
 
 func (app *appEnv) Exec(ctx context.Context) (err error) {
-	defer func() { clogger.Logger.Info("done") }()
+	defer func() { slog.Info("done") }()
 
 	if err := app.configureService(); err != nil {
 		return err
@@ -95,13 +95,13 @@ func (app *appEnv) Exec(ctx context.Context) (err error) {
 	ch := make(chan error, 1)
 	go func() {
 		<-ctx.Done()
-		clogger.Logger.Info("shutting down")
+		slog.Info("shutting down")
 
 		shutdownCtx, stop := context.WithTimeout(context.Background(), 10*time.Second)
 		defer stop()
 		ch <- srv.Shutdown(shutdownCtx)
 	}()
-	clogger.Logger.Info("starting", "port", app.port)
+	slog.Info("starting", "port", app.port)
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		return err
 	}
