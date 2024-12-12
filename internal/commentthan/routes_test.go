@@ -22,21 +22,22 @@ func clearComment(c *db.Comment) {
 	c.ModifiedAt = time.Date(1969, 7, 20, 20, 17, 40, 0, time.UTC)
 }
 
-func testApp(t *testing.T) *appEnv {
+func testService(t *testing.T) *service {
 	dir := t.TempDir()
 	dbname := filepath.Join(dir, "test.db")
 	app := appEnv{
 		dbname: dbname,
 	}
-	be.NilErr(t, app.configureService())
+	svc, err := app.configureService()
+	be.NilErr(t, err)
 	t.Cleanup(func() {
-		app.closeService()
+		svc.closeService()
 	})
-	return &app
+	return svc
 }
 
-func (app *appEnv) testRouter() *httptest.Server {
-	h := app.router()
+func (svc *service) testRouter() *httptest.Server {
+	h := svc.router()
 	srv := httptest.NewServer(h)
 	srv.Client().CheckRedirect = requests.NoFollow
 	return srv
@@ -44,10 +45,10 @@ func (app *appEnv) testRouter() *httptest.Server {
 
 func TestHealthcheck(t *testing.T) {
 	t.Parallel()
-	app := testApp(t)
+	svc := testService(t)
 	ctx := context.Background()
 
-	srv := app.testRouter()
+	srv := svc.testRouter()
 	defer srv.Close()
 
 	var body string
@@ -62,10 +63,10 @@ func TestHealthcheck(t *testing.T) {
 
 func TestPostComment(t *testing.T) {
 	t.Parallel()
-	app := testApp(t)
+	svc := testService(t)
 	ctx := context.Background()
 
-	srv := app.testRouter()
+	srv := svc.testRouter()
 	defer srv.Close()
 
 	rb := requests.
@@ -107,7 +108,7 @@ func TestPostComment(t *testing.T) {
 		CheckStatus(400).
 		Fetch(ctx))
 
-	comments, err := app.svc.q.ListComments(ctx, db.ListCommentsParams{
+	comments, err := svc.q.ListComments(ctx, db.ListCommentsParams{
 		Limit:  3,
 		Offset: 0,
 	})

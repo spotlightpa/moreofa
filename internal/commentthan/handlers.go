@@ -9,7 +9,7 @@ import (
 	"github.com/spotlightpa/moreofa/layouts"
 )
 
-func (app *appEnv) replyHTMLErr(err error) http.Handler {
+func (rr *router) replyHTMLErr(err error) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		clogger.LogRequestErr(r, err)
 		code := errx.StatusCode(err)

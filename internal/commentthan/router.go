@@ -11,12 +11,24 @@ import (
 	"github.com/spotlightpa/moreofa/static"
 )
 
-func (app *appEnv) router() http.Handler {
+type router struct {
+	svc *service
+	h   http.Handler
+}
+
+var _ http.Handler = (*router)(nil)
+
+func (rr *router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	rr.h.ServeHTTP(w, r)
+}
+
+func (svc *service) router() http.Handler {
+	rr := &router{svc: svc}
 	srv := http.NewServeMux()
-	srv.Handle("GET /", app.notFound())
-	srv.Handle("GET /api/healthcheck", app.healthCheck())
-	srv.Handle("GET /api/sentrycheck", app.sentryCheck())
-	srv.Handle("POST /comment", app.postComment())
+	srv.Handle("GET /", rr.notFound())
+	srv.Handle("GET /api/healthcheck", rr.healthCheck())
+	srv.Handle("GET /api/sentrycheck", rr.sentryCheck())
+	srv.Handle("POST /comment", rr.postComment())
 
 	fs.WalkDir(static.FS, ".", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
@@ -36,6 +48,6 @@ func (app *appEnv) router() http.Handler {
 		timeoutMiddleware(10 * time.Second),
 		versionMiddleware,
 	}
-
-	return baseMW.Handler(srv)
+	rr.h = baseMW.Handler(srv)
+	return rr
 }

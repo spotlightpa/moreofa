@@ -77,13 +77,13 @@ type appEnv struct {
 
 func (app *appEnv) Exec(ctx context.Context) (err error) {
 	defer func() { slog.Info("done") }()
-
-	if err := app.configureService(); err != nil {
+	svc, err := app.configureService()
+	if err != nil {
 		return err
 	}
-	defer app.closeService()
+	defer svc.closeService()
 
-	handler := app.router()
+	handler := svc.router()
 	srv := &http.Server{
 		Addr:              app.port,
 		Handler:           handler,
