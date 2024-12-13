@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dghubble/gologin/v2"
+	gologingoogle "github.com/dghubble/gologin/v2/google"
 	"github.com/earthboundkid/mid"
 	"github.com/gorilla/schema"
 	"github.com/spotlightpa/moreofa/internal/clogger"
@@ -84,5 +86,27 @@ func (rr *router) postComment() mid.Controller {
 		}
 		http.Redirect(w, r, rr.svc.redirectSuccess, http.StatusSeeOther)
 		return nil
+	}
+}
+
+func (rr *router) googleCallback() mid.Controller {
+	return func(w http.ResponseWriter, r *http.Request) http.Handler {
+		ctx := r.Context()
+		googleUser, err := gologingoogle.UserFromContext(ctx)
+		if err != nil {
+			return rr.replyHTMLErr(err)
+		}
+
+		clogger.FromContext(ctx).Info("googleCallback", "user", googleUser)
+		// TODO save info in session
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return nil
+	}
+}
+
+func (rr *router) googleCallbackError() mid.Controller {
+	return func(w http.ResponseWriter, r *http.Request) http.Handler {
+		err := gologin.ErrorFromContext(r.Context())
+		return rr.replyHTMLErr(errx.E{S: http.StatusBadRequest, E: err})
 	}
 }

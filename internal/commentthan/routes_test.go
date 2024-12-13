@@ -38,7 +38,10 @@ func testService(t *testing.T) *service {
 }
 
 func (svc *service) testRouter() *httptest.Server {
-	h := svc.router()
+	app := appEnv{
+		isLocalhost: true,
+	}
+	h := app.router(svc)
 	srv := httptest.NewServer(h)
 	srv.Client().CheckRedirect = requests.NoFollow
 	return srv
