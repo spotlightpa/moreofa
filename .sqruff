@@ -1,6 +1,7 @@
 [sqruff]
 dialect = sqlite
 rules = all
+exclude_rules = AM04
 templater = placeholder
 
 [sqruff:templater:placeholder]

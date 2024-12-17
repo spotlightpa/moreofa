@@ -7,11 +7,10 @@ VALUES
 (
   ?, ?, ?, ?, ?, ?, ?, ?, ?
 )
-RETURNING * ;
+RETURNING *;
 
 -- name: ListComments :many
 SELECT *
 FROM comment
 ORDER BY modified_at DESC
-LIMIT ?
-OFFSET ? ;
+LIMIT ? OFFSET ?;

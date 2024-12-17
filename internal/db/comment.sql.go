@@ -69,8 +69,7 @@ const listComments = `-- name: ListComments :many
 SELECT id, name, contact, subject, cc, message, ip, user_agent, referrer, host_page, created_at, modified_at
 FROM comment
 ORDER BY modified_at DESC
-LIMIT ?
-OFFSET ?
+LIMIT ? OFFSET ?
 `
 
 type ListCommentsParams struct {
