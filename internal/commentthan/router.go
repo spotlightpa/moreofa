@@ -32,7 +32,7 @@ func (app *appEnv) router(svc *service) http.Handler {
 	srv := http.NewServeMux()
 	srv.Handle("GET /", rr.notFound())
 	srv.Handle("GET /api/healthcheck", rr.healthCheck())
-	srv.Handle("GET /api/sentrycheck", rr.sentryCheck())
+	srv.Handle("POST /api/sentrycheck", rr.sentryCheck())
 	srv.Handle("POST /comment", rr.postComment())
 
 	fs.WalkDir(static.FS, ".", func(path string, d fs.DirEntry, err error) error {
