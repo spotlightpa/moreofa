@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/sqlite3store"
+	"github.com/alexedwards/scs/v2"
 	"github.com/earthboundkid/versioninfo/v2"
 	"github.com/getsentry/sentry-go"
 	"github.com/spotlightpa/moreofa/internal/clogger"
@@ -19,6 +21,7 @@ type service struct {
 	q               *db.Queries
 	cl              *http.Client
 	redirectSuccess string
+	sessionManager  *scs.SessionManager
 }
 
 func (app *appEnv) configureService() (*service, error) {
@@ -49,6 +52,12 @@ func (app *appEnv) configureService() (*service, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	sessionManager := scs.New()
+	sessionManager.Store = sqlite3store.New(dbase)
+	sessionManager.Lifetime = 28 * 24 * time.Hour
+	sessionManager.Cookie.Secure = !app.isLocalhost
+
 	return &service{
 		db: dbase,
 		q:  db.New(db.Log(dbase)),
@@ -57,10 +66,12 @@ func (app *appEnv) configureService() (*service, error) {
 			Timeout:   5 * time.Second,
 		},
 		redirectSuccess: app.redirectSuccess,
+		sessionManager:  sessionManager,
 	}, nil
 }
 
 func (svc *service) closeService() {
+	svc.sessionManager.Store.(*sqlite3store.SQLite3Store).StopCleanup()
 	if err := svc.db.Close(); err != nil {
 		slog.Error("closeService", "error", err)
 	}

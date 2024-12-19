@@ -22,3 +22,9 @@ type Comment struct {
 	CreatedAt  time.Time
 	ModifiedAt time.Time
 }
+
+type Session struct {
+	Token  string
+	Data   []byte
+	Expiry float64
+}

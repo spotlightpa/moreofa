@@ -9,6 +9,7 @@ import (
 
 	"github.com/dghubble/gologin/v2"
 	gologingoogle "github.com/dghubble/gologin/v2/google"
+	"github.com/earthboundkid/emailx/v2"
 	"github.com/earthboundkid/mid"
 	"github.com/gorilla/schema"
 	"github.com/spotlightpa/moreofa/internal/clogger"
@@ -98,7 +99,25 @@ func (rr *router) googleCallback() mid.Controller {
 		}
 
 		clogger.FromContext(ctx).Info("googleCallback", "user", googleUser)
-		// TODO save info in session
+		var role []string
+		_, domain := emailx.Split(googleUser.Email)
+		if domain == "spotlightpa.org" {
+			role = []string{"spotlightpa"}
+		}
+		user := User{
+			Role:       role,
+			Email:      googleUser.Email,
+			FamilyName: googleUser.FamilyName,
+			Gender:     googleUser.Gender,
+			GivenName:  googleUser.GivenName,
+			Hd:         googleUser.Hd,
+			Id:         googleUser.Id,
+			Link:       googleUser.Link,
+			Locale:     googleUser.Locale,
+			Name:       googleUser.Name,
+			Picture:    googleUser.Picture,
+		}
+		rr.svc.sessionManager.Put(r.Context(), "user", user)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return nil
 	}
@@ -108,5 +127,23 @@ func (rr *router) googleCallbackError() mid.Controller {
 	return func(w http.ResponseWriter, r *http.Request) http.Handler {
 		err := gologin.ErrorFromContext(r.Context())
 		return rr.replyHTMLErr(errx.E{S: http.StatusBadRequest, E: err})
+	}
+}
+
+func (rr *router) getComments() mid.Controller {
+	return func(w http.ResponseWriter, r *http.Request) http.Handler {
+		l := clogger.FromContext(r.Context())
+		l.InfoContext(r.Context(), "getComments")
+		return nil
+	}
+}
+
+func (rr *router) postLogout() mid.Controller {
+	return func(w http.ResponseWriter, r *http.Request) http.Handler {
+		l := clogger.FromContext(r.Context())
+		l.InfoContext(r.Context(), "postLogout")
+		rr.svc.sessionManager.Remove(r.Context(), "user")
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return nil
 	}
 }

@@ -3,12 +3,15 @@ module github.com/spotlightpa/moreofa
 go 1.23
 
 require (
+	github.com/alexedwards/scs/sqlite3store v0.0.0-20240316134038-7e11d57e8885
+	github.com/alexedwards/scs/v2 v2.8.0
 	github.com/amacneil/dbmate/v2 v2.23.0
 	github.com/carlmjohnson/be v0.23.2
 	github.com/carlmjohnson/exitcode v0.20.2
 	github.com/carlmjohnson/flagx v0.22.2
 	github.com/carlmjohnson/requests v0.24.2
 	github.com/dghubble/gologin/v2 v2.5.0
+	github.com/earthboundkid/emailx/v2 v2.24.1
 	github.com/earthboundkid/mid v0.24.1
 	github.com/earthboundkid/versioninfo/v2 v2.24.1
 	github.com/getsentry/sentry-go v0.29.1
@@ -23,6 +26,7 @@ require (
 	cloud.google.com/go/auth v0.10.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.5 // indirect
 	cloud.google.com/go/compute/metadata v0.5.2 // indirect
+	github.com/earthboundkid/bytemap/v2 v2.24.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

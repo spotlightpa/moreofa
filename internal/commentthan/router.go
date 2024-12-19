@@ -34,6 +34,12 @@ func (app *appEnv) router(svc *service) http.Handler {
 	srv.Handle("GET /api/healthcheck", rr.healthCheck())
 	srv.Handle("POST /api/sentrycheck", rr.sentryCheck())
 	srv.Handle("POST /comment", rr.postComment())
+	spotlightMW := mid.Stack{
+		svc.userMiddleware,
+		rr.roleMiddleware("spotlightpa"),
+	}
+	srv.Handle("GET /comments", spotlightMW.Handler(rr.getComments()))
+	srv.Handle("POST /logout", spotlightMW.Handler(rr.postLogout()))
 
 	fs.WalkDir(static.FS, ".", func(path string, d fs.DirEntry, err error) error {
 		if d.IsDir() {
@@ -78,6 +84,7 @@ func (app *appEnv) router(svc *service) http.Handler {
 	googleCallback := gologingoogle.CallbackHandler(oauthConf, rr.googleCallback(), rr.googleCallbackError())
 	googleCallback = gologingoogle.StateHandler(cookieConf, googleCallback)
 	googleCallback = svc.oauthClientMiddleware(googleCallback)
+	googleCallback = svc.sessionManager.LoadAndSave(googleCallback)
 	srv.Handle("GET /google-callback", googleCallback)
 
 	rr.h = baseMW.Handler(srv)
