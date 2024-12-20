@@ -8,8 +8,6 @@ cloud.google.com/go/compute/metadata v0.5.2/go.mod h1:C66sj2AluDcIqakBq/M8lw8/yb
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/alexedwards/scs/sqlite3store v0.0.0-20240316134038-7e11d57e8885 h1:+DCxWg/ojncqS+TGAuRUoV7OfG/S4doh0pcpAwEcow0=
-github.com/alexedwards/scs/sqlite3store v0.0.0-20240316134038-7e11d57e8885/go.mod h1:Iyk7S76cxGaiEX/mSYmTZzYehp4KfyylcLaV3OnToss=
 github.com/alexedwards/scs/v2 v2.8.0 h1:h31yUYoycPuL0zt14c0gd+oqxfRwIj6SOjHdKRZxhEw=
 github.com/alexedwards/scs/v2 v2.8.0/go.mod h1:ToaROZxyKukJKT/xLcVQAChi5k6+Pn1Gvmdl7h3RRj8=
 github.com/amacneil/dbmate/v2 v2.23.0 h1:KsolutitPR4yTKHj33tdZ6Vn/bGMxXSmpg7eulBwJSc=
@@ -36,6 +34,8 @@ github.com/earthboundkid/emailx/v2 v2.24.1 h1:DK/4Eh36IvxCR+29E7xbaxi8gPxgAvm4zM
 github.com/earthboundkid/emailx/v2 v2.24.1/go.mod h1:8UAz0q898I8GBxekObC/Tj6qfF3CJWWNACn+U2DRHlY=
 github.com/earthboundkid/mid v0.24.1 h1:Hz8neRUGqnghs/0UtrdoTZBis7x1OXbOHvLVQzlGXh4=
 github.com/earthboundkid/mid v0.24.1/go.mod h1:hEWtmnPsQdlni4aenDZ4NQ81NesS7gas5RVoiEncpU0=
+github.com/earthboundkid/scs/sqlite3store v0.0.0-20241220221428-7869406cf4b7 h1:g5mf87CvNLlam4y9+gL9KsKPWK0AljxeYfvQZdVseGo=
+github.com/earthboundkid/scs/sqlite3store v0.0.0-20241220221428-7869406cf4b7/go.mod h1:Iyk7S76cxGaiEX/mSYmTZzYehp4KfyylcLaV3OnToss=
 github.com/earthboundkid/versioninfo/v2 v2.24.1 h1:SJTMHaoUx3GzjjnUO1QzP3ZXK6Ee/nbWyCm58eY3oUg=
 github.com/earthboundkid/versioninfo/v2 v2.24.1/go.mod h1:VcWEooDEuyUJnMfbdTh0uFN4cfEIg+kHMuWB2CDCLjw=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=

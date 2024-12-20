@@ -50,3 +50,5 @@ require (
 	google.golang.org/grpc v1.68.0 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
 )
+
+replace github.com/alexedwards/scs/sqlite3store => github.com/earthboundkid/scs/sqlite3store v0.0.0-20241220221428-7869406cf4b7
